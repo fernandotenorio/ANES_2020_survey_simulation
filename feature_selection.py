@@ -1,6 +1,5 @@
 from datagen import get_topics, get_backstory_variables
 from ollama import chat
-#from scipy.spatial.distance import jensenshannon
 import re
 import os
 import random

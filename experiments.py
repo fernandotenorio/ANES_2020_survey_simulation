@@ -28,7 +28,6 @@ def format_persona(persona_dict, fields):
 
 def make_sys_prompt0(persona, today):
     return f'Roleplay the person below. {today}\nWhen questioned, answer just with the option number and nothing more.\n\n{persona}'
-    #return f'Roleplay the person below. {today}\nAnswer ONLY with the option number and NOTHING MORE.\n\n{persona}'
 
 
 def make_sys_prompt1(persona, context='Today is November 3, 2020. You live in the United States.'):
@@ -72,11 +71,8 @@ def run_single_model_experiment(model_name, personas, backstory_fields, topic, o
     for persona_dict, answers_dict in personas:
         persona = format_persona(persona_dict, backstory_fields)
         qa = generate_question_answer_template(topic)
-
         sys_prompt = make_sys_prompt0(persona, today)
-        #sys_prompt = make_sys_prompt1(persona)
-        #sys_prompt = make_sys_prompt2(persona)
-
+       
         messages = [
                     {'role': 'system', 'content': sys_prompt},
                     {'role': 'user', 'content': qa}, 
@@ -125,21 +121,6 @@ def create_experiment_data(output_folder, random_state=None, train_ratio=0.7):
         save_pickle(personas_train, data_folder, f'personas_train_{topic}.pkl')
         save_pickle(personas_val, data_folder, f'personas_val_{topic}.pkl')
 
-
-# def run_experiment_for_model(model_dict, exp_folder, temperature, single):
-#     '''all variables available'''
-#     topics = get_topics()
-#     model_name = model_dict['model_name']
-#     model_alias = model_dict['model_alias']
-
-#     for topic in topics:
-#         data_folder = os.path.join(exp_folder, 'data')
-#         # LLM runs on validation set
-#         personas_val = load_pickle(data_folder, f'personas_val_{topic}.pkl')
-#         output_file = os.path.join(exp_folder, f'{model_alias}_{topic}_T{temperature}.csv')
-#         selected_backstory_fields = run_feature_selection(model_name, topic, temperature, single)
-#         print(f'Selected backstory fields for topic {topic}: {selected_backstory_fields}')
-#         run_single_model_experiment(model_name, personas_val, selected_backstory_fields, topic, output_file, add_date=True, temperature=temperature)
 
 def run_incremental_experiment_for_model(model_dict, exp_folder, temperature, single):
     ''' all variables available'''
@@ -192,17 +173,17 @@ def run_baseline_experiment(model_dict, exp_folder, temperature, random_state):
     topics = get_topics()
     model_name = model_dict['model_name']
     model_alias = model_dict['model_alias']
-    k = 2
+    k = 3
 
-    # for topic in topics:
-    #     df, personas = get_data(backstory_fields, topic)
-    #     folds = k_fold_split_data(df, personas, n_folds=k, random_state=random_state, shuffle=True)
+    for topic in topics:
+        df, personas = get_data(backstory_fields, topic)
+        folds = k_fold_split_data(df, personas, n_folds=k, random_state=random_state, shuffle=True)
 
-    #     for i, (df_train, df_val, personas_train, personas_val) in enumerate(folds):
-    #         save_pickle(df_train, data_folder, f'df_train_{topic}_{i}.pkl')
-    #         save_pickle(df_val, data_folder, f'df_val_{topic}_{i}.pkl')
-    #         save_pickle(personas_train, data_folder, f'personas_train_{topic}_{i}.pkl')
-    #         save_pickle(personas_val, data_folder, f'personas_val_{topic}_{i}.pkl')
+        for i, (df_train, df_val, personas_train, personas_val) in enumerate(folds):
+            save_pickle(df_train, data_folder, f'df_train_{topic}_{i}.pkl')
+            save_pickle(df_val, data_folder, f'df_val_{topic}_{i}.pkl')
+            save_pickle(personas_train, data_folder, f'personas_train_{topic}_{i}.pkl')
+            save_pickle(personas_val, data_folder, f'personas_val_{topic}_{i}.pkl')
 
     # run models
     for topic in topics:
@@ -254,15 +235,15 @@ def run_all_folds_experiment(model_dict, exp_folder, temperature, random_state):
     attit_feats = get_attitudinal_features()
     moral_feats = get_moral_features()
 
-    # for topic in topics:
-    #     df, personas = get_data(backstory_fields, topic)      
-    #     folds = k_fold_split_data(df, personas, n_folds=k, random_state=random_state, shuffle=True)
+    for topic in topics:
+        df, personas = get_data(backstory_fields, topic)      
+        folds = k_fold_split_data(df, personas, n_folds=k, random_state=random_state, shuffle=True)
 
-    #     for i, (df_train, df_val, personas_train, personas_val) in enumerate(folds):
-    #         save_pickle(df_train, data_folder, f'df_train_{topic}_{i}.pkl')
-    #         save_pickle(df_val, data_folder, f'df_val_{topic}_{i}.pkl')
-    #         save_pickle(personas_train, data_folder, f'personas_train_{topic}_{i}.pkl')
-    #         save_pickle(personas_val, data_folder, f'personas_val_{topic}_{i}.pkl')
+        for i, (df_train, df_val, personas_train, personas_val) in enumerate(folds):
+            save_pickle(df_train, data_folder, f'df_train_{topic}_{i}.pkl')
+            save_pickle(df_val, data_folder, f'df_val_{topic}_{i}.pkl')
+            save_pickle(personas_train, data_folder, f'personas_train_{topic}_{i}.pkl')
+            save_pickle(personas_val, data_folder, f'personas_val_{topic}_{i}.pkl')
 
     variable_groups = [
                 ('demo', dict(demographic=True, attitudinal=False, moral=False), demo_feats),
@@ -319,10 +300,6 @@ def run_all_folds_experiment(model_dict, exp_folder, temperature, random_state):
 
 if __name__ == '__main__':
     model_dict = {'model_name': 'gemma3:12b-it-q4_K_M', 'model_alias': 'Gemma3_12B'}
-    #model_dict = {'model_name': 'qwen2.5:14b-instruct-q6_K', 'model_alias': 'Qwen2.5_14B'}
-    #model_dict = {'model_name': 'sushruth/solar-uncensored:latest', 'model_alias': 'Solar_10B'}
-    #model_dict = {'model_name': 'mistral-nemo:12b-instruct-2407-q6_K', 'model_alias': 'Mistral_12B'}
-    #model_dict = {'model_name': 'gpt-4o', 'model_alias': 'ChatGPT-4o'}
     exp_folder = 'experiment_all_folds'
     temperature = 0.3
     #run_baseline_experiment(model_dict, exp_folder, temperature, 42)

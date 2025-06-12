@@ -391,7 +391,6 @@ def compare_main_baseline(folder, model_prefix):
 
 def compare_rf_llm_pool(folder='experiment_all_folds_no_selection', model_prefix='Gemma3_12B'):
     df = run(folder, model_prefix)
-    #df = run('experiment_all_folds_qwen_selection', 'Qwen2.5_14B')
 
     prefix = ['', 'rf_']
     res_df = pd.DataFrame()
@@ -543,9 +542,6 @@ def compare_select_no_select():
     df_all = compare_main_baseline('experiment_all_folds', 'Gemma3_12B')
     df_selec = compare_main_baseline('experiment_all_folds_no_selection', 'Gemma3_12B')
     results = []
-
-    # print(df_all['JS'].mean())
-    # print(df_selec['JS'].mean())
 
     for i in range(len(df_all)):
         f1_all = df_all.iloc[i]['F1-score']
